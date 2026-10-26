@@ -6,7 +6,7 @@
 #include <string.h>
 #include "../shader/text_shader/shader.h"
 
-static const int FONT_BITMAP_SIZE = 2048;
+#define FONT_BITMAP_SIZE 2048
 static const int first_char = 32;
 static const int last_char = 126;
 static stbtt_fontinfo font;
@@ -53,7 +53,7 @@ void ttf_load_font(const char* path, float pixel_height){
     fprintf(stderr, "Failed to Initialise Font\n");
     return;
   }
-  unsigned char bitmap[FONT_BITMAP_SIZE * FONT_BITMAP_SIZE];
+  static unsigned char bitmap[FONT_BITMAP_SIZE * FONT_BITMAP_SIZE];
   stbtt_BakeFontBitmap(ttf_buffer, 0, pixel_height, bitmap, FONT_BITMAP_SIZE, FONT_BITMAP_SIZE, first_char, 96, cdata);
   glGenTextures(1, &font_texture);
   glBindTexture(GL_TEXTURE_2D, font_texture);

@@ -4,7 +4,17 @@
     {
       "label": "Build",
       "type": "shell",
-      "command": "make",
+      "command": "mingw32-make",
+      "options": {
+        "shell": {
+          "executable": "C:\\msys64\\usr\\bin\\bash.exe",
+          "args": ["--login", "-i", "-c"]
+        },
+        "env": {
+          "MSYSTEM": "MINGW64",
+          "CHERE_INVOKING": "1"
+        }
+      },
       "group": {
         "kind": "build",
         "isDefault": true
@@ -14,7 +24,17 @@
     {
       "label": "Clean",
       "type": "shell",
-      "command": "make clean"
+      "command": "mingw32-make clean",
+      "options": {
+        "shell": {
+          "executable": "C:\\msys64\\usr\\bin\\bash.exe",
+          "args": ["--login", "-i", "-c"]
+        },
+        "env": {
+          "MSYSTEM": "MINGW64",
+          "CHERE_INVOKING": "1"
+        }
+      }
     }
   ]
 }

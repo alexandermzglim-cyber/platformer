@@ -81,7 +81,7 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
       }
     }
   }
-  else if (*current_state = game_state_paused){
+  else if (*current_state == game_state_paused){
     if (action == GLFW_PRESS){
       switch(key){
         case GLFW_KEY_UP:

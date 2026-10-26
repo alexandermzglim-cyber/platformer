@@ -12,4 +12,4 @@ run: platformer.exe
 	./platformer.exe
 
 clean:
-	del platformer.exe
+	rm -f platformer.exe
