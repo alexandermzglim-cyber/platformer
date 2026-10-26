@@ -1,99 +1,122 @@
+"""START HERE!  Run the game by typing this in a terminal:   python pygame_port/main.py
+
+Every video game has a "game loop". It is a while loop that goes round and
+round very fast (hundreds of times a second). Each time round it does 4 things:
+  1. Check which keys are being pressed
+  2. Work out how much time has passed
+  3. Move everything and draw the picture
+  4. Show the picture on the screen
+Each picture is called a "frame".
+
+The other files each look after one part of the game:
+  game.py           - which screen we're on (menu, playing, paused...)
+  level.py          - loads the levels from the .map files
+  player.py         - how the red square moves and jumps
+  camera.py         - which part of the level you can see
+  input_handler.py  - what each key does
+  render.py         - drawing everything
+"""
+
 import time
 
 import pygame
 
 from camera import Camera
-from game import Game, State
-from input_handler import handle_key_event, update_held_keys
+from game import Game
+from input_handler import handle_key_press, handle_key_release, handle_held_keys
 from level import Level
 from player import Player
 from render import Renderer
 
-LOGICAL_W = 3200
-LOGICAL_H = 1500
-MAX_DT = 0.05
-CAMERA_ZOOM = 2.5
-SPAWN_POSITION = (10.0, 5.0)
-SCREEN_FILL_FRACTION = 0.9
+# Where the player appears at the start of a level, and after dying.
+SPAWN_X = 10.0
+SPAWN_Y = 5.0
 
+# If a frame takes longer than this (e.g. the window was dragged), pretend it
+# only took this long. Otherwise the player could jump straight through a wall.
+MAX_FRAME_TIME = 0.05
 
-def create_window():
-    desktop_w, desktop_h = pygame.display.get_desktop_sizes()[0]
-    fit = min(desktop_w * SCREEN_FILL_FRACTION / LOGICAL_W,
-              desktop_h * SCREEN_FILL_FRACTION / LOGICAL_H, 1.0)
-    window = pygame.display.set_mode((round(LOGICAL_W * fit), round(LOGICAL_H * fit)), pygame.RESIZABLE)
-    pygame.display.set_caption("Platformer Game")
-    return window
+FRAMES_PER_SECOND = 240
 
 
 def main():
     pygame.init()
-    window = create_window()
-    renderer = Renderer(window, LOGICAL_W, LOGICAL_H)
+    renderer = Renderer()
     clock = pygame.time.Clock()
 
     game = Game()
-    camera = Camera(CAMERA_ZOOM, LOGICAL_W, LOGICAL_H)
-    player = Player(400.0, 300.0)
-    level = None
+    camera = Camera()
+    player = Player(SPAWN_X, SPAWN_Y)
+    level = None  # no level is loaded until the player picks one
 
     last_time = time.perf_counter()
-    first_frame = True
+
     while game.running:
+        # 1. Handle events: the window's close button and key presses.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game.running = False
-            elif event.type == pygame.VIDEORESIZE:
-                renderer.update_viewport()
-            elif event.type in (pygame.KEYDOWN, pygame.KEYUP):
-                handle_key_event(game, player, event)
-        if not game.running:
-            break
+            elif event.type == pygame.KEYDOWN:
+                handle_key_press(game, player, event.key)
+            elif event.type == pygame.KEYUP:
+                handle_key_release(game, player, event.key)
 
-        current_time = time.perf_counter()
-        dt = current_time - last_time
-        if not first_frame and not pygame.key.get_focused():
-            last_time = current_time
+        # 2. Work out dt ("delta time"): how many seconds since the last frame.
+        #    It's usually a tiny number like 0.004. We move things by speed * dt,
+        #    so the game runs at the same speed on fast and slow computers.
+        now = time.perf_counter()
+        dt = now - last_time
+        last_time = now
+        if dt > MAX_FRAME_TIME:
+            dt = MAX_FRAME_TIME
+
+        # Pause everything while the window isn't selected.
+        if not pygame.key.get_focused():
             clock.tick(30)
             continue
-        first_frame = False
-        dt = min(dt, MAX_DT)
-        last_time = current_time
 
-        if game.state == State.MENU:
-            renderer.draw_menu(game)
-        elif game.state == State.LEVEL_SELECT:
+        # 3. Update and draw whichever screen we're on.
+        if game.state == "menu":
+            renderer.draw_main_menu(game)
+
+        elif game.state == "level_select":
             renderer.draw_level_select(game)
-            if game.level_confirmation:
+            if game.start_level_requested:
+                game.start_level_requested = False
                 level = Level(game.level_selected)
-                player.reset(*SPAWN_POSITION)
-                game.level_confirmation = False
-                game.state = State.PLAYING
-        elif game.state == State.PLAYING:
-            update_held_keys(game, player, dt)
+                player.respawn(SPAWN_X, SPAWN_Y)
+                game.state = "playing"
+
+        elif game.state == "playing":
+            handle_held_keys(game, player, dt)
             player.update(level, dt)
-            if player.on_goal(level):
-                game.level_completed = True
-            if player.on_spike(level) or player.fell_off_level(level):
-                player.reset(*SPAWN_POSITION)
-            if game.level_completed:
-                game.level_completed = False
+
+            if player.touching_spike(level) or player.fell_off_level(level):
+                player.respawn(SPAWN_X, SPAWN_Y)
+            elif player.touching_goal(level):
                 game.levels_completed[game.level_selected] = True
-                game.state = State.LEVEL_COMPLETE
-            camera.update(player, LOGICAL_W, LOGICAL_H, dt)
-            renderer.draw_world(level, player, camera)
-        elif game.state == State.PAUSED:
-            renderer.draw_pause(game)
-        elif game.state == State.LEVEL_COMPLETE:
+                game.state = "level_complete"
+
+            camera.update(player, dt)
+            renderer.draw_level(level, player, camera)
+
+        elif game.state == "paused":
+            renderer.draw_pause_menu(game)
+
+        elif game.state == "level_complete":
             renderer.draw_level_complete()
-        elif game.state == State.EDITOR:
+
+        elif game.state == "editor":
             renderer.draw_editor()
 
+        # 4. Show what we just drew, then wait so we don't run faster than FRAMES_PER_SECOND.
         pygame.display.flip()
-        clock.tick(240)
+        clock.tick(FRAMES_PER_SECOND)
 
     pygame.quit()
 
 
+# This means "only start the game if this file was run directly",
+# not if another file imports it.
 if __name__ == "__main__":
     main()
