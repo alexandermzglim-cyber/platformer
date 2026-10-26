@@ -17,6 +17,7 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
            break;
         case GLFW_KEY_SPACE:
         case GLFW_KEY_W:
+        case GLFW_KEY_UP:
            player_jump(player_ptr);
            break;
       }
@@ -25,6 +26,7 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
       switch (key){
         case GLFW_KEY_SPACE:
         case GLFW_KEY_W:
+        case GLFW_KEY_UP:
            release_jump(player_ptr);
       }
     }
@@ -144,10 +146,10 @@ void input_update(float dt){
   if (*current_state != game_state_playing){
     return;
   }
-  if (glfwGetKey(used_window, GLFW_KEY_A) == GLFW_PRESS){
+  if (glfwGetKey(used_window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(used_window, GLFW_KEY_LEFT) == GLFW_PRESS){
     player_move_left(player_ptr, dt);
   }
-  if (glfwGetKey(used_window, GLFW_KEY_D) == GLFW_PRESS){
+  if (glfwGetKey(used_window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(used_window, GLFW_KEY_RIGHT) == GLFW_PRESS){
     player_move_right(player_ptr, dt);
   }
 }

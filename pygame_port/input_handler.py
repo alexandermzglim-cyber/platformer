@@ -10,7 +10,7 @@ from game import LEVEL_COUNT, MAIN_MENU_OPTIONS, PAUSE_MENU_OPTIONS, move_select
 
 
 def is_jump_key(key):
-    return key == pygame.K_SPACE or key == pygame.K_w
+    return key == pygame.K_SPACE or key == pygame.K_w or key == pygame.K_UP
 
 
 def handle_key_press(game, player, key):
@@ -79,11 +79,11 @@ def handle_key_release(game, player, key):
 
 
 def handle_held_keys(game, player, dt):
-    """Called every frame. Runs left or right while A or D is held down."""
+    """Called every frame. Runs left or right while A/D or the left/right arrow keys are held down."""
     if game.state != "playing":
         return
     keys_held = pygame.key.get_pressed()
-    if keys_held[pygame.K_a]:
+    if keys_held[pygame.K_a] or keys_held[pygame.K_LEFT]:
         player.run_left(dt)
-    if keys_held[pygame.K_d]:
+    if keys_held[pygame.K_d] or keys_held[pygame.K_RIGHT]:
         player.run_right(dt)
