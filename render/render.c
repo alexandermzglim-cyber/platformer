@@ -36,7 +36,7 @@ void render_init(GLFWwindow* window, camera_info *camera){
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, NULL, GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*) 0);
   glEnableVertexAttribArray(0);
-  glClearColor(1, 0, 0, 0);
+  glClearColor(1, 1, 1, 1);
 }
 
 static void draw_rectangle(float x, float y, float w, float h, float r, float g, float b, camera_info* camera, int window_x, int window_y){
