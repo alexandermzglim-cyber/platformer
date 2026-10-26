@@ -13,7 +13,8 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
     if (action == GLFW_PRESS){
       switch (key){
         case GLFW_KEY_ESCAPE:
-           *current_state = game_state_paused;    
+           *current_state = game_state_paused;
+           break;
         case GLFW_KEY_SPACE:
         case GLFW_KEY_W:
            player_jump(player_ptr);
@@ -38,7 +39,7 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
          break;
       case GLFW_KEY_DOWN:
          main_menu_selected++;
-         if (main_menu_selected >= menu_count + 1){
+         if (main_menu_selected >= menu_count){
           main_menu_selected = 0;
          }
          break;
@@ -62,7 +63,7 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
         case GLFW_KEY_UP:
            level_selected--;
            if (level_selected < 0){
-            level_selected = 0;
+            level_selected = level_count - 1;
            }
            break;
         case GLFW_KEY_DOWN:
@@ -116,6 +117,11 @@ static void key_callback(GLFWwindow*, int key, int scancode, int action, int mod
            *current_state = game_state_playing;
            break;
       }
+    }
+  }
+  else if (*current_state == game_state_editor){
+    if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE){
+      *current_state = game_state_menu;
     }
   }
   else if (*current_state == game_state_level_complete){

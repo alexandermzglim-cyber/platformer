@@ -32,30 +32,6 @@ static bool check_spike(int x, int y){
   return (spike == 2);
 }
 
-static bool check_checkpoint(int x, int y){
-  if (x < 0 || x >= max_level_width){
-    return false;
-  }
-  if (y < 0 || y >= max_level_height){
-    return false;
-  }
-  int checkpoint;
-  checkpoint = current_level[y][x];
-  return (checkpoint == 4);
-}
-
-bool player_on_checkpoint(player_info *p){
-  float center_x;
-  center_x = (*p).position.x + player_width / 2;
-  float center_y;
-  center_y = (*p).position.y + player_height / 2;
-  int tile_x;
-  tile_x = (int)(center_x / TILE_SIZE);
-  int tile_y;
-  tile_y = (int)(center_y / TILE_SIZE);
-
-}
-
 bool player_on_spike(player_info *p){
   float center_x;
   center_x = (*p).position.x + player_width / 2;
@@ -70,12 +46,18 @@ bool player_on_spike(player_info *p){
   return is_spike;
 }
 
+bool player_fell_off_level(player_info *p){
+  return (*p).position.y >= max_level_height * TILE_SIZE;
+}
+
 void player_init(player_info *p, vector1 start_position){
   (*p).position = start_position;
   (*p).velocity = (vector1){0.0f, 0.0f};
   (*p).ground = false;
   (*p).buffer_time = 0.0f;
   (*p).jump_held = false;
+  (*p).cyte_time = 0.0f;
+  (*p).jump_cut = false;
 }
 
 static void apply_gravity(player_info *p, float dt){

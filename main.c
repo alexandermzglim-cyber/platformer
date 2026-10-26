@@ -88,7 +88,7 @@ int main(void){
       case game_state_playing:
          input_update((float)dt);
          player_update(&player, (float)dt);
-         if (player_on_spike(&player)){
+         if (player_on_spike(&player) || player_fell_off_level(&player)){
           player_init(&player, (vector1){10.0f, 5.0f});
         }
          handle_level_complete(&current_state);
@@ -100,6 +100,9 @@ int main(void){
          break;
       case game_state_level_complete:
          render_level_completed();
+         break;
+      case game_state_editor:
+         render_editor();
          break;
     }
     glfwSwapBuffers(window);

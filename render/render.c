@@ -36,7 +36,7 @@ void render_init(GLFWwindow* window, camera_info *camera){
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, NULL, GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*) 0);
   glEnableVertexAttribArray(0);
-  glClearColor(1, 1, 1, 1);
+  glClearColor(1, 0, 0, 0);
 }
 
 static void draw_rectangle(float x, float y, float w, float h, float r, float g, float b, camera_info* camera, int window_x, int window_y){
@@ -85,65 +85,71 @@ static void draw_ground(int window_x, camera_info *camera, int window_y){
 
 void render_menu(void){
   glClear(GL_COLOR_BUFFER_BIT);
-  ttf_render_text("PLATFORMER", 1450, 650, 1.0f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("PLAY", 1450, 500, 0.9f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("EDITOR", 1450, 350, 0.9f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("QUIT", 1450, 200, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+  ttf_render_text("PLATFORMER", 1450, 650, 1.0f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("PLAY", 1450, 500, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("EDITOR", 1450, 350, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("QUIT", 1450, 200, 0.9f, 0.5f, 0.5f, 0, 0, 0);
   switch(main_menu_selected){
     case 0:
-       ttf_render_text("->", 1210, 440, 1.0f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1210, 500, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
     case 1:
-       ttf_render_text("->", 1210, 350, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1210, 350, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
     case 2:
-       ttf_render_text("->", 1210, 200, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1210, 200, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
   }
 }
 
 void render_levels(void){
   glClear(GL_COLOR_BUFFER_BIT);
-  ttf_render_text("SELECT LEVEL", 1450, 650, 1.0f, 0.5f, 0.5f, 1, 1, 1);
+  ttf_render_text("SELECT LEVEL", 1450, 650, 1.0f, 0.5f, 0.5f, 0, 0, 0);
   int buffer;
   buffer = 500;
   for (int i = 0; i < level_count; i++){
     char level_text[32];
     snprintf(level_text, sizeof(level_text), "LEVEL %d", i + 1);
-    ttf_render_text(level_text, 1450, buffer, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+    ttf_render_text(level_text, 1450, buffer, 0.9f, 0.5f, 0.5f, 0, 0, 0);
     buffer -= 150;
     if (i == level_selected){
-      ttf_render_text("->", 1210, buffer + 150, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+      ttf_render_text("->", 1210, buffer + 150, 0.9f, 0.5f, 0.5f, 0, 0, 0);
     }
   }
 }
 
 void render_pause(void){
   glClear(GL_COLOR_BUFFER_BIT);
-  ttf_render_text("RESUME", 1450, 500, 0.9f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("LEVEL_SELECT", 1459, 350, 0.9f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("MAIN MENU", 1450, 200, 0.9f, 0.5f, 0.5f, 1, 1, 1);
-  ttf_render_text("QUIT", 1450, 50, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+  ttf_render_text("RESUME", 1450, 500, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("LEVEL_SELECT", 1459, 350, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("MAIN MENU", 1450, 200, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("QUIT", 1450, 50, 0.9f, 0.5f, 0.5f, 0, 0, 0);
   switch(pause_selected){
     case 0:
-       ttf_render_text("->", 1100, 500, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1100, 500, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
     case 1:
-       ttf_render_text("->", 1100, 350, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1100, 350, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
     case 2:
-       ttf_render_text("->", 1100, 200, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1100, 200, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
     case 3:
-       ttf_render_text("->", 1100, 50, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+       ttf_render_text("->", 1100, 50, 0.9f, 0.5f, 0.5f, 0, 0, 0);
        break;
   }
+}
+
+void render_editor(void){
+  glClear(GL_COLOR_BUFFER_BIT);
+  ttf_render_text("EDITOR NOT AVAILABLE", 1450, 650, 0.9f, 0.5f, 0.5f, 0, 0, 0);
+  ttf_render_text("PRESS ESCAPE", 1450, 500, 0.9f, 0.5f, 0.5f, 0, 0, 0);
 }
 
 void render_level_completed(void){
   glClear(GL_COLOR_BUFFER_BIT);
   ttf_render_text("LEVEL COMPLETED!", 1350, 500, 0.9f, 0.5f, 0.5f, 0, 1, 0);
-  ttf_render_text("PRESS_ENTER", 1350, 350, 0.9f, 0.5f, 0.5f, 1, 1, 1);
+  ttf_render_text("PRESS_ENTER", 1350, 350, 0.9f, 0.5f, 0.5f, 0, 0, 0);
 }
 
 

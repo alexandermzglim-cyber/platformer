@@ -22,6 +22,8 @@ static void apply_friction(player_info *p, float t);
 
 bool player_on_spike(player_info *p);
 
+bool player_fell_off_level(player_info *p);
+
 static void movement(player_info *p, float t);
 
 static void change_collision_x(player_info *p, float dt);

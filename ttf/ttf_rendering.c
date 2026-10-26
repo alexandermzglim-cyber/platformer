@@ -16,6 +16,7 @@ static GLuint vao = 0;
 static GLuint vbo = 0;
 static GLuint shader_program = 0;
 static stbtt_bakedchar cdata[96];
+static float font_scale = 1.0f;
 
 static void init_shader(void){
   GLuint vs = compile_text_shader(GL_VERTEX_SHADER, vertex_shader_src);
@@ -53,6 +54,7 @@ void ttf_load_font(const char* path, float pixel_height){
     fprintf(stderr, "Failed to Initialise Font\n");
     return;
   }
+  font_scale = stbtt_ScaleForPixelHeight(&font, pixel_height);
   static unsigned char bitmap[FONT_BITMAP_SIZE * FONT_BITMAP_SIZE];
   stbtt_BakeFontBitmap(ttf_buffer, 0, pixel_height, bitmap, FONT_BITMAP_SIZE, FONT_BITMAP_SIZE, first_char, 96, cdata);
   glGenTextures(1, &font_texture);
@@ -93,10 +95,10 @@ void ttf_render_text(const char* text, float x, float y, float scale, float anch
   int lineGap;
   stbtt_GetFontVMetrics(&font, &ascent, &descent, &lineGap);
   float text_height;
-  text_height = (ascent - descent) * scale;
+  text_height = (ascent - descent) * font_scale * scale;
   glUseProgram(shader_program);
   GLint color_loc;
-  color_loc = glGetUniformLocation(shader_program, "textColor");
+  color_loc = glGetUniformLocation(shader_program, "textcolor");
   glUniform3f(color_loc, r, g, b);
   int width;
   int height;
@@ -106,6 +108,7 @@ void ttf_render_text(const char* text, float x, float y, float scale, float anch
   height = viewport[3];
   y = height - y;
   y -= text_height * anchor_y;
+  y += ascent * font_scale * scale;
   float projection[16] = {2.0f/width, 0, 0, 0, 0, -2.0f/height, 0, 0, 0, 0, -1, 0, -1, 1, 0, 1};
   GLint proj_loc;
   proj_loc = glGetUniformLocation(shader_program, "projection");
@@ -132,7 +135,8 @@ void ttf_render_text(const char* text, float x, float y, float scale, float anch
     q.x0 = x_before + (q.x0 - x_before) * scale;
     q.x1 = x_before + (q.x1 - x_before) * scale;
     q.y0 = y_before + (q.y0 - y_before) * scale;
-    q.y1 = y_before + (q.y1 - y_before) * scale; 
+    q.y1 = y_before + (q.y1 - y_before) * scale;
+    xpos = x_before + (xpos - x_before) * scale;
     float vertices [6][4] = {{q.x0, q.y1, q.s0, q.t1}, {q.x0, q.y0, q.s0, q.t0}, {q.x1, q.y0, q.s1, q.t0}, {q.x0, q.y1, q.s0, q.t1}, {q.x1, q.y0, q.s1, q.t0}, {q.x1, q.y1, q.s1, q.t1}};
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);

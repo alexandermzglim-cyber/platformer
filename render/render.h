@@ -19,6 +19,8 @@ void render_pause(void);
 
 void render_level_completed(void);
 
+void render_editor(void);
+
 void render_update(player_info *p, camera_info* camera, int window_x, int window_y);
 
 #endif
