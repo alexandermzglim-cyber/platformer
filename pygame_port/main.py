@@ -15,6 +15,24 @@ The other files each look after one part of the game:
   camera.py         - which part of the level you can see
   input_handler.py  - what each key does
   render.py         - drawing everything
+
+ABOUT THE ": int" AND "-> None" BITS YOU'LL SEE EVERYWHERE
+These are "type hints". They say what kind of value a variable holds:
+    speed: float = 0.0                    speed holds a decimal number
+    def add(a: int, b: int) -> int:       add takes two whole numbers and gives back a whole number
+    def jump(self) -> None:               jump doesn't give anything back
+Python ignores type hints when it runs the game. They are notes for people,
+and VS Code uses them to spot mistakes and suggest names as you type.
+
+The types you'll see most:
+    int         a whole number, like 3 or -10
+    float       a decimal number, like 2.5
+    str         text, like "PLAY"
+    bool        True or False
+    list[str]   a list where every item is text, like ["PLAY", "QUIT"]
+    tuple[int, int]   a pair of whole numbers, like (4, 7)
+    None        nothing
+    Player, Level, Camera...   our own classes, defined in the other files
 """
 
 import time
@@ -29,27 +47,29 @@ from player import Player
 from render import Renderer
 
 # Where the player appears at the start of a level, and after dying.
-SPAWN_X = 10.0
-SPAWN_Y = 5.0
+SPAWN_X: float = 10.0
+SPAWN_Y: float = 5.0
 
 # If a frame takes longer than this (e.g. the window was dragged), pretend it
 # only took this long. Otherwise the player could jump straight through a wall.
-MAX_FRAME_TIME = 0.05
+MAX_FRAME_TIME: float = 0.05
 
-FRAMES_PER_SECOND = 240
+FRAMES_PER_SECOND: int = 240
 
 
-def main():
+def main() -> None:
     pygame.init()
-    renderer = Renderer()
-    clock = pygame.time.Clock()
+    renderer: Renderer = Renderer()
+    clock: pygame.time.Clock = pygame.time.Clock()
 
-    game = Game()
-    camera = Camera()
-    player = Player(SPAWN_X, SPAWN_Y)
-    level = None  # no level is loaded until the player picks one
+    game: Game = Game()
+    camera: Camera = Camera()
+    player: Player = Player(SPAWN_X, SPAWN_Y)
+    # Start with level 1 loaded. It gets replaced when the player picks a level.
+    level: Level = Level(0)
 
-    last_time = time.perf_counter()
+    # time.perf_counter() gives the current time in seconds, as a float.
+    last_time: float = time.perf_counter()
 
     while game.running:
         # 1. Handle events: the window's close button and key presses.
@@ -64,8 +84,8 @@ def main():
         # 2. Work out dt ("delta time"): how many seconds since the last frame.
         #    It's usually a tiny number like 0.004. We move things by speed * dt,
         #    so the game runs at the same speed on fast and slow computers.
-        now = time.perf_counter()
-        dt = now - last_time
+        now: float = time.perf_counter()
+        dt: float = now - last_time
         last_time = now
         if dt > MAX_FRAME_TIME:
             dt = MAX_FRAME_TIME

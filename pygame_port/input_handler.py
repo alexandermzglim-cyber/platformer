@@ -2,18 +2,22 @@
 
 Menus react to single key presses. Running reacts to keys being held down,
 so it's checked every frame instead (see handle_held_keys).
+
+pygame gives every key a number, e.g. pygame.K_SPACE is the space bar.
+That's why the `key` variables below are ints (whole numbers).
 """
 
 import pygame
 
-from game import LEVEL_COUNT, MAIN_MENU_OPTIONS, PAUSE_MENU_OPTIONS, move_selection
+from game import Game, LEVEL_COUNT, MAIN_MENU_OPTIONS, PAUSE_MENU_OPTIONS, move_selection
+from player import Player
 
 
-def is_jump_key(key):
+def is_jump_key(key: int) -> bool:
     return key == pygame.K_SPACE or key == pygame.K_w or key == pygame.K_UP
 
 
-def handle_key_press(game, player, key):
+def handle_key_press(game: Game, player: Player, key: int) -> None:
     """Called once each time a key goes down."""
     if game.state == "playing":
         if key == pygame.K_ESCAPE:
@@ -27,7 +31,7 @@ def handle_key_press(game, player, key):
         elif key == pygame.K_DOWN:
             game.main_menu_selected = move_selection(game.main_menu_selected, +1, len(MAIN_MENU_OPTIONS))
         elif key == pygame.K_RETURN:
-            choice = MAIN_MENU_OPTIONS[game.main_menu_selected]
+            choice: str = MAIN_MENU_OPTIONS[game.main_menu_selected]
             if choice == "PLAY":
                 game.state = "level_select"
             elif choice == "EDITOR":
@@ -53,14 +57,14 @@ def handle_key_press(game, player, key):
         elif key == pygame.K_ESCAPE:
             game.state = "playing"
         elif key == pygame.K_RETURN:
-            choice = PAUSE_MENU_OPTIONS[game.pause_menu_selected]
-            if choice == "RESUME":
+            pause_choice: str = PAUSE_MENU_OPTIONS[game.pause_menu_selected]
+            if pause_choice == "RESUME":
                 game.state = "playing"
-            elif choice == "LEVEL_SELECT":
+            elif pause_choice == "LEVEL_SELECT":
                 game.state = "level_select"
-            elif choice == "MAIN MENU":
+            elif pause_choice == "MAIN MENU":
                 game.state = "menu"
-            elif choice == "QUIT":
+            elif pause_choice == "QUIT":
                 game.running = False
 
     elif game.state == "level_complete":
@@ -72,16 +76,17 @@ def handle_key_press(game, player, key):
             game.state = "menu"
 
 
-def handle_key_release(game, player, key):
+def handle_key_release(game: Game, player: Player, key: int) -> None:
     """Called once each time a key comes back up."""
     if game.state == "playing" and is_jump_key(key):
         player.release_jump()
 
 
-def handle_held_keys(game, player, dt):
+def handle_held_keys(game: Game, player: Player, dt: float) -> None:
     """Called every frame. Runs left or right while A/D or the left/right arrow keys are held down."""
     if game.state != "playing":
         return
+    # keys_held works like a list of True/False values, one for every key on the keyboard.
     keys_held = pygame.key.get_pressed()
     if keys_held[pygame.K_a] or keys_held[pygame.K_LEFT]:
         player.run_left(dt)

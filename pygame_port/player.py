@@ -5,31 +5,31 @@ IMPORTANT: on computer screens, y goes DOWN as it gets bigger.
   So a negative speed_y means moving UP, and a positive speed_y means falling.
 """
 
-from level import BLOCK, SPIKE, GOAL, TILE_SIZE
+from level import Level, BLOCK, SPIKE, GOAL, TILE_SIZE
 
-PLAYER_WIDTH = 16
-PLAYER_HEIGHT = 16
+PLAYER_WIDTH: int = 16
+PLAYER_HEIGHT: int = 16
 
 # Speeds are in pixels per second. Accelerations are in pixels per second, per second.
-GRAVITY = 2200.0
-FALLING_GRAVITY_MULTIPLIER = 1.5  # fall faster than you rise, which feels snappier
-RUN_ACCELERATION = 1900.0
-AIR_CONTROL = 0.5                 # you can only steer half as well in the air
-FRICTION = 1500.0                 # how quickly you slow down on the ground
-MAX_RUN_SPEED = 300.0
-JUMP_SPEED = -550.0               # negative because up is negative y
-JUMP_CUT = 0.5                    # letting go of jump early halves your upward speed
+GRAVITY: float = 2200.0
+FALLING_GRAVITY_MULTIPLIER: float = 1.5  # fall faster than you rise, which feels snappier
+RUN_ACCELERATION: float = 1900.0
+AIR_CONTROL: float = 0.5                 # you can only steer half as well in the air
+FRICTION: float = 1500.0                 # how quickly you slow down on the ground
+MAX_RUN_SPEED: float = 300.0
+JUMP_SPEED: float = -550.0               # negative because up is negative y
+JUMP_CUT: float = 0.5                    # letting go of jump early halves your upward speed
 
 # Two tricks that make jumping feel fair. Most platform games use them.
 # "Coyote time": you can still jump for 0.1 seconds after running off a ledge,
 # like a cartoon coyote that runs off a cliff and doesn't fall straight away.
-COYOTE_TIME = 0.1
+COYOTE_TIME: float = 0.1
 # "Jump buffer": if you press jump up to 0.1 seconds BEFORE you land,
 # the game remembers and jumps as soon as you touch the ground.
-JUMP_BUFFER_TIME = 0.1
+JUMP_BUFFER_TIME: float = 0.1
 
 
-def move_towards(current, target, step):
+def move_towards(current: float, target: float, step: float) -> float:
     """Change current by up to `step`, getting closer to target without going past it."""
     if current < target:
         current = current + step
@@ -46,48 +46,48 @@ def move_towards(current, target, step):
 # Inside the class, "self" means "this player", so self.x is this player's x position.
 class Player:
     # __init__ runs automatically when we make a player with Player(x, y).
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float) -> None:
         self.respawn(x, y)
 
-    def respawn(self, x, y):
+    def respawn(self, x: float, y: float) -> None:
         """Put the player at (x, y), standing still, with all jump timers cleared."""
-        self.x = x
-        self.y = y
-        self.speed_x = 0.0
-        self.speed_y = 0.0
-        self.on_ground = False
-        self.coyote_timer = 0.0
-        self.jump_buffer_timer = 0.0
-        self.jump_held = False
-        self.jump_already_cut = False
+        self.x: float = x                       # position of the player's top-left corner
+        self.y: float = y
+        self.speed_x: float = 0.0               # pixels per second, + is right
+        self.speed_y: float = 0.0               # pixels per second, + is down
+        self.on_ground: bool = False
+        self.coyote_timer: float = 0.0          # seconds of coyote time left
+        self.jump_buffer_timer: float = 0.0     # seconds left to use a buffered jump press
+        self.jump_held: bool = False            # is a jump key being held down?
+        self.jump_already_cut: bool = False     # has this jump already been made shorter?
 
     # ---- Called by the controls ----
 
-    def press_jump(self):
+    def press_jump(self) -> None:
         # Don't jump straight away: start the buffer timer, and update() jumps
         # as soon as the player is allowed to.
         self.jump_buffer_timer = JUMP_BUFFER_TIME
         self.jump_held = True
         self.jump_already_cut = False
 
-    def release_jump(self):
+    def release_jump(self) -> None:
         self.jump_held = False
 
-    def run_left(self, dt):
-        steering = 1.0
+    def run_left(self, dt: float) -> None:
+        steering: float = 1.0
         if not self.on_ground:
             steering = AIR_CONTROL
         self.speed_x = move_towards(self.speed_x, -MAX_RUN_SPEED, RUN_ACCELERATION * dt * steering)
 
-    def run_right(self, dt):
-        steering = 1.0
+    def run_right(self, dt: float) -> None:
+        steering: float = 1.0
         if not self.on_ground:
             steering = AIR_CONTROL
         self.speed_x = move_towards(self.speed_x, MAX_RUN_SPEED, RUN_ACCELERATION * dt * steering)
 
     # ---- Called once per frame ----
 
-    def update(self, level, dt):
+    def update(self, level: Level, dt: float) -> None:
         """Move the player forward by dt seconds. The order of these steps matters."""
         self.on_ground = False
         self.apply_gravity(dt)
@@ -99,29 +99,29 @@ class Player:
         self.update_coyote_timer(dt)
         self.update_jump_buffer_timer(dt)
 
-    def apply_gravity(self, dt):
-        strength = GRAVITY
+    def apply_gravity(self, dt: float) -> None:
+        strength: float = GRAVITY
         if self.speed_y > 0:  # falling
             strength = GRAVITY * FALLING_GRAVITY_MULTIPLIER
         self.speed_y = self.speed_y + strength * dt
 
-    def cut_jump_if_released(self):
+    def cut_jump_if_released(self) -> None:
         # Short tap = small jump, hold = big jump.
-        moving_up = self.speed_y < 0
+        moving_up: bool = self.speed_y < 0
         if moving_up and not self.jump_held and not self.jump_already_cut:
             self.speed_y = self.speed_y * JUMP_CUT
             self.jump_already_cut = True
 
-    def jump_if_allowed(self):
-        can_jump = self.on_ground or self.coyote_timer > 0
-        wants_to_jump = self.jump_buffer_timer > 0
+    def jump_if_allowed(self) -> None:
+        can_jump: bool = self.on_ground or self.coyote_timer > 0
+        wants_to_jump: bool = self.jump_buffer_timer > 0
         if can_jump and wants_to_jump:
             self.speed_y = JUMP_SPEED
             self.on_ground = False
             self.coyote_timer = 0.0
             self.jump_buffer_timer = 0.0
 
-    def move_horizontally(self, level, dt):
+    def move_horizontally(self, level: Level, dt: float) -> None:
         self.x = self.x + self.speed_x * dt
 
         block = self.find_block_overlapping_player(level)
@@ -136,7 +136,7 @@ class Player:
             self.x = (block_column + 1) * TILE_SIZE
         self.speed_x = 0.0
 
-    def move_vertically(self, level, dt):
+    def move_vertically(self, level: Level, dt: float) -> None:
         self.y = self.y + self.speed_y * dt
         self.on_ground = False
 
@@ -153,17 +153,18 @@ class Player:
             self.y = (block_row + 1) * TILE_SIZE
         self.speed_y = 0.0
 
-    def find_block_overlapping_player(self, level):
+    # "tuple[int, int] | None" means: gives back a pair of whole numbers, OR None.
+    def find_block_overlapping_player(self, level: Level) -> tuple[int, int] | None:
         """Return (column, row) of the first block the player overlaps, or None if there isn't one."""
         # Work out which tiles the player's square covers.
         # Dividing a position by TILE_SIZE (16) and rounding down with int()
         # turns a pixel position into a tile number, e.g. x = 40 is in column 2.
         # The 0.01 stops a player who is exactly touching the next tile from
         # counting as inside it.
-        left_column = int(self.x / TILE_SIZE)
-        right_column = int((self.x + PLAYER_WIDTH - 0.01) / TILE_SIZE)
-        top_row = int(self.y / TILE_SIZE)
-        bottom_row = int((self.y + PLAYER_HEIGHT - 0.01) / TILE_SIZE)
+        left_column: int = int(self.x / TILE_SIZE)
+        right_column: int = int((self.x + PLAYER_WIDTH - 0.01) / TILE_SIZE)
+        top_row: int = int(self.y / TILE_SIZE)
+        bottom_row: int = int((self.y + PLAYER_HEIGHT - 0.01) / TILE_SIZE)
 
         for row in range(top_row, bottom_row + 1):
             for column in range(left_column, right_column + 1):
@@ -171,7 +172,7 @@ class Player:
                     return (column, row)
         return None
 
-    def apply_friction(self, dt):
+    def apply_friction(self, dt: float) -> None:
         if not self.on_ground:
             return
         if self.speed_x > 0:
@@ -183,7 +184,7 @@ class Player:
             if self.speed_x > 0:
                 self.speed_x = 0.0
 
-    def update_coyote_timer(self, dt):
+    def update_coyote_timer(self, dt: float) -> None:
         if self.on_ground:
             self.coyote_timer = COYOTE_TIME
         else:
@@ -191,27 +192,27 @@ class Player:
             if self.coyote_timer < 0:
                 self.coyote_timer = 0.0
 
-    def update_jump_buffer_timer(self, dt):
+    def update_jump_buffer_timer(self, dt: float) -> None:
         self.jump_buffer_timer = self.jump_buffer_timer - dt
         if self.jump_buffer_timer < 0:
             self.jump_buffer_timer = 0.0
 
     # ---- Questions main.py asks each frame ----
 
-    def tile_at_centre(self, level):
+    def tile_at_centre(self, level: Level) -> int:
         """Return the tile under the middle of the player."""
-        centre_x = self.x + PLAYER_WIDTH // 2
-        centre_y = self.y + PLAYER_HEIGHT // 2
-        column = int(centre_x / TILE_SIZE)
-        row = int(centre_y / TILE_SIZE)
+        centre_x: float = self.x + PLAYER_WIDTH // 2
+        centre_y: float = self.y + PLAYER_HEIGHT // 2
+        column: int = int(centre_x / TILE_SIZE)
+        row: int = int(centre_y / TILE_SIZE)
         return level.get_tile(column, row)
 
-    def touching_spike(self, level):
+    def touching_spike(self, level: Level) -> bool:
         return self.tile_at_centre(level) == SPIKE
 
-    def touching_goal(self, level):
+    def touching_goal(self, level: Level) -> bool:
         return self.tile_at_centre(level) == GOAL
 
-    def fell_off_level(self, level):
-        level_bottom = level.height * TILE_SIZE
+    def fell_off_level(self, level: Level) -> bool:
+        level_bottom: int = level.height * TILE_SIZE
         return self.y >= level_bottom
