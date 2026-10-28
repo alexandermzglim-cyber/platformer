@@ -106,8 +106,15 @@ def main() -> None:
                 level = Level(game.level_selected)
                 player.respawn(SPAWN_X, SPAWN_Y)
                 game.state = "playing"
+                # Start the timer from zero for the new level.
+                # (It can't be called just "time", because that name is already
+                # used by the time module we imported at the top of this file.)
+                game.level_time = 0.0
 
         elif game.state == "playing":
+            # Add the time this frame took, so the timer counts up in seconds.
+            game.level_time = game.level_time + dt
+
             handle_held_keys(game, player, dt)
             player.update(level, dt)
 
@@ -118,13 +125,13 @@ def main() -> None:
                 game.state = "level_complete"
 
             camera.update(player, dt)
-            renderer.draw_level(level, player, camera)
+            renderer.draw_level(level, player, camera, game)
 
         elif game.state == "paused":
             renderer.draw_pause_menu(game)
 
         elif game.state == "level_complete":
-            renderer.draw_level_complete()
+            renderer.draw_level_complete(game)
 
         elif game.state == "editor":
             renderer.draw_editor()

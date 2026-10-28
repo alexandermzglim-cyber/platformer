@@ -39,6 +39,10 @@ TITLE_Y: int = 850
 FIRST_ITEM_Y: int = 1000
 ITEM_SPACING: int = 150     # gap between menu lines
 
+# Where the timer goes while playing (centre of the text, in game pixels).
+TIMER_X: int = 1600
+TIMER_Y: int = 100
+
 # Leave a little room around the window so it fits on screen with the taskbar.
 SCREEN_FILL: float = 0.9
 
@@ -123,17 +127,18 @@ class Renderer:
             if index == game.pause_menu_selected:
                 self.draw_text("->", PAUSE_ARROW_X, y, self.item_font)
 
-    def draw_level_complete(self) -> None:
+    def draw_level_complete(self, game: Game) -> None:
         self.screen.fill(WHITE)
         self.draw_text("LEVEL COMPLETED!", 1350, FIRST_ITEM_Y, self.item_font, GREEN)
-        self.draw_text("PRESS_ENTER", 1350, FIRST_ITEM_Y + ITEM_SPACING, self.item_font)
+        self.draw_text(f"TIME: {game.level_time:.2f}", 1350, FIRST_ITEM_Y + ITEM_SPACING, self.item_font)
+        self.draw_text("PRESS_ENTER", 1350, FIRST_ITEM_Y + 2 * ITEM_SPACING, self.item_font)
 
     def draw_editor(self) -> None:
         self.screen.fill(WHITE)
         self.draw_text("EDITOR NOT AVAILABLE", MENU_X, TITLE_Y, self.item_font)
         self.draw_text("PRESS ESCAPE", MENU_X, FIRST_ITEM_Y, self.item_font)
 
-    def draw_level(self, level: Level, player: Player, camera: Camera) -> None:
+    def draw_level(self, level: Level, player: Player, camera: Camera, game: Game) -> None:
         self.screen.fill(WHITE)
 
         for row in range(level.height):
@@ -153,3 +158,7 @@ class Renderer:
                     self.draw_world_rectangle(camera, x, y, TILE_SIZE, TILE_SIZE, GREEN)
 
         self.draw_world_rectangle(camera, player.x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT, RED)
+
+        # The timer goes at the top of the screen, on top of the level.
+        # :.2f means "show 2 decimal places", e.g. 12.34
+        self.draw_text(f"TIME: {game.level_time:.2f}", TIMER_X, TIMER_Y, self.item_font)

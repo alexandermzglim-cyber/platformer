@@ -36,6 +36,10 @@ class Game:
         # One True/False per level, recording which levels have been finished.
         self.levels_completed: list[bool] = [False] * LEVEL_COUNT
 
+        # How many seconds the player has spent on the current level.
+        # It only counts up while playing, so pausing stops the clock.
+        self.level_time: float = 0.0
+
 
 def move_selection(selected: int, change: int, option_count: int) -> int:
     """Move a menu highlight up (change = -1) or down (change = +1), wrapping around the ends."""
