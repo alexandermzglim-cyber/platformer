@@ -2,7 +2,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Platformer",
+      "name": "Debug Python Game",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/pygame_port/main.py",
+      "cwd": "${workspaceFolder}/pygame_port",
+      "python": "C:/Users/JohnGay/AppData/Local/Programs/Python/Python313/python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Debug C Game",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/platformer.exe",
